@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice | TalkMate AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <a class="logo" href="/">TalkMate <span>AI</span></a>
+        <a class="back-link" href="/">← Back home</a>
+    </header>
+
+    <main class="practice-page">
+        <div class="pill">✦ YOUR PRACTICE SPACE</div>
+        <h1>Every conversation is <span>a new beginning.</span></h1>
+        <p class="description">
+            Choose a situation you'd like to practice. Start small, express yourself,
+            and grow your confidence.
+        </p>
+
+        <section class="scenario-grid">
+            <button class="scenario-card" type="button">
+                <span class="scenario-icon">👋</span>
+                <span class="scenario-title">Everyday Conversation</span>
+                <span class="scenario-description">Practice greetings and casual chats.</span>
+            </button>
+
+            <button class="scenario-card" type="button">
+                <span class="scenario-icon">💼</span>
+                <span class="scenario-title">Job Interview</span>
+                <span class="scenario-description">Prepare to introduce yourself professionally.</span>
+            </button>
+
+            <button class="scenario-card" type="button">
+                <span class="scenario-icon">🎤</span>
+                <span class="scenario-title">Public Speaking</span>
+                <span class="scenario-description">Organize your thoughts and speak clearly.</span>
+            </button>
+
+            <button class="scenario-card" type="button">
+                <span class="scenario-icon">🤝</span>
+                <span class="scenario-title">Meeting New People</span>
+                <span class="scenario-description">Build connections and keep conversations going.</span>
+            </button>
+        </section>
+
+        <p class="footer-note">No pressure. Just practice, one step at a time.</p>
+    </main>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

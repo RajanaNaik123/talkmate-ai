@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation Practice | TalkMate AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <a class="logo" href="/">TalkMate <span>AI</span></a>
+        <a class="back-link" href="/practice">← Change scenario</a>
+    </header>
+
+    <main class="chat-page">
+        <div class="pill">✦ PRACTICE SESSION</div>
+        <h1 id="scenario-title">Let's talk!</h1>
+        <p class="description" id="scenario-description">
+            Take your time. There's no pressure to be perfect.
+        </p>
+
+        <section class="chat-panel">
+            <div class="chat-status">
+                <span class="status-dot"></span>
+                TalkMate conversation practice
+            </div>
+
+            <div class="messages" id="messages" aria-live="polite">
+                <div class="message coach-message">
+                    <span class="message-label">TALKMATE AI</span>
+                    <p id="greeting">Hi there! 👋 I'm here to help you practice. Tell me a little about yourself to get started.</p>
+                </div>
+            </div>
+
+            <form id="chat-form" class="chat-form">
+                <label class="sr-only" for="message-input">Your message</label>
+                <input
+                    id="message-input"
+                    name="message"
+                    type="text"
+                    placeholder="Type your message here..."
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="send-button">Send →</button>
+            </form>
+
+            <p class="chat-hint">Practice at your own pace. Every conversation is a learning opportunity.</p>
+        
+<div id="feedback-panel" class="feedback-panel" aria-live="polite">
+    <h3>✦ Communication tip</h3>
+    <p id="feedback-text">Your feedback will appear here after you send a message.</p>
+</div>
+        </section>
+    </main>
+
+   
+<script>
+    
+const params = new URLSearchParams(window.location.search);
+const scenario = params.get("scenario") || "Everyday Conversation";
+
+document.getElementById("scenario-title").textContent = scenario;
+document.title = scenario + " | TalkMate AI";
+
+const greetings = {
+    "Everyday Conversation": "Hey! 👋 How has your day been so far?",
+    "Job Interview": "Welcome to your practice interview! Could you tell me a little about yourself?",
+    "Public Speaking": "Let's practice speaking clearly. What topic would you like to introduce to an audience?",
+    "Meeting New People": "Hi! It's nice to meet you. What do you enjoy doing in your free time?"
+};
+
+document.getElementById("greeting").textContent =
+    greetings[scenario] || "Hi there! Tell me a little about yourself to get started.";
+
+const chatForm = document.getElementById("chat-form");
+const messageInput = document.getElementById("message-input");
+const messages = document.getElementById("messages");
+
+chatForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, "user-message", "YOU");
+    getCommunicationTip(message);
+    messageInput.value = "";
+
+    const reply = getCoachReply(message);
+
+    setTimeout(() => {
+        addMessage(reply, "coach-message", "TALKMATE AI");
+        messages.scrollTop = messages.scrollHeight;
+    }, 500);
+
+    messages.scrollTop = messages.scrollHeight;
+    messageInput.focus();
+});
+
+function addMessage(text, className, labelText) {
+    const messageElement = document.createElement("div");
+    messageElement.className = `message ${className}`;
+
+    const label = document.createElement("span");
+    label.className = "message-label";
+    label.textContent = labelText;
+
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+
+    messageElement.appendChild(label);
+    messageElement.appendChild(paragraph);
+    messages.appendChild(messageElement);
+}
+
+function getCoachReply(message) {
+    const text = message.toLowerCase();
+
+    if (text.includes("hello") || text.includes("hi")) {
+        return "Hello! 😊 Great to meet you. Could you tell me a little more about yourself?";
+    }
+
+    if (text.includes("nervous") || text.includes("scared")) {
+        return "It's okay to feel nervous. Take your time. What's one thing you'd like to say first?";
+    }
+
+    if (scenario === "Job Interview") {
+        return "Thanks for sharing! Could you give me a specific example that demonstrates your skills?";
+    }
+
+    if (scenario === "Public Speaking") {
+        return "Good start! Try explaining your main point in one clear sentence. What would you like your audience to remember?";
+    }
+
+    if (scenario === "Meeting New People") {
+        return "That's interesting! What got you interested in that? I'd love to hear more.";
+    }
+
+    return "Thanks for sharing! 😊 Could you tell me a little more about that? Try expressing your next thought in one or two clear sentences.";
+}
+
+function getCommunicationTip(message) {
+    const words = message.trim().split(/\s+/).filter(Boolean);
+    const feedbackText = document.getElementById("feedback-text");
+
+    if (words.length <= 3) {
+        feedbackText.textContent =
+            "Try adding a little more detail to express your thoughts clearly.";
+    } else if (words.length <= 15) {
+        feedbackText.textContent =
+            "Nice effort! Your message is concise. Try adding a specific example when it helps explain your point.";
+    } else {
+        feedbackText.textContent =
+            "Your message has several words. Try breaking longer thoughts into shorter sentences for clarity.";
+    }
+}
+</script>
+</body>
+</html>
