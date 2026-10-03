@@ -57,7 +57,7 @@
 
    
 <script>
-    
+ 
 const params = new URLSearchParams(window.location.search);
 const scenario = params.get("scenario") || "Everyday Conversation";
 
@@ -66,37 +66,76 @@ document.title = scenario + " | TalkMate AI";
 
 const greetings = {
     "Everyday Conversation": "Hey! 👋 How has your day been so far?",
-    "Job Interview": "Welcome to your practice interview! Could you tell me a little about yourself?",
-    "Public Speaking": "Let's practice speaking clearly. What topic would you like to introduce to an audience?",
-    "Meeting New People": "Hi! It's nice to meet you. What do you enjoy doing in your free time?"
+    "Job Interview": "Welcome! Could you tell me a little about yourself?",
+    "Public Speaking": "Let's practice speaking clearly. What topic would you like to introduce?",
+    "Meeting New People": "Hi! Nice to meet you. What do you enjoy doing in your free time?"
 };
 
 document.getElementById("greeting").textContent =
-    greetings[scenario] || "Hi there! Tell me a little about yourself to get started.";
+    greetings[scenario] || "Hi there! Tell me a little about yourself.";
 
 const chatForm = document.getElementById("chat-form");
 const messageInput = document.getElementById("message-input");
 const messages = document.getElementById("messages");
+const feedbackText = document.getElementById("feedback-text");
+const sendButton = chatForm.querySelector('button[type="submit"]');
 
-chatForm.addEventListener("submit", function (event) {
+chatForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const message = messageInput.value.trim();
     if (!message) return;
 
     addMessage(message, "user-message", "YOU");
-    getCommunicationTip(message);
     messageInput.value = "";
-
-    const reply = getCoachReply(message);
-
-    setTimeout(() => {
-        addMessage(reply, "coach-message", "TALKMATE AI");
-        messages.scrollTop = messages.scrollHeight;
-    }, 500);
-
-    messages.scrollTop = messages.scrollHeight;
     messageInput.focus();
+
+    if (sendButton) sendButton.disabled = true;
+
+    feedbackText.textContent = "Thinking of a communication tip...";
+
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message,
+                scenario: scenario
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Something went wrong.");
+        }
+
+        addMessage(data.reply, "coach-message", "TALKMATE AI");
+        feedbackText.textContent = getCommunicationTip(message);
+    
+} catch (error) {
+    let fallback = "I'm having trouble connecting right now. Let's keep practicing!";
+
+    if (/english|learn|learning|speak|sentence/i.test(message)) {
+        fallback = 'English tip: Try saying, "I want to improve my English." Practice saying it aloud three times.';
+    } else if (/hello|hi|hey/i.test(message)) {
+        fallback = "Conversation tip: After saying hello, ask an open-ended question such as, 'How has your day been?'";
+    }
+
+    addMessage(
+        fallback,
+        "coach-message",
+        "TALKMATE AI"
+    );
+
+    feedbackText.textContent =
+        "Offline practice tip — the AI service may be temporarily unavailable.";
+} finally {
+        if (sendButton) sendButton.disabled = false;
+        messages.scrollTop = messages.scrollHeight;
+    }
 });
 
 function addMessage(text, className, labelText) {
@@ -108,54 +147,40 @@ function addMessage(text, className, labelText) {
     label.textContent = labelText;
 
     const paragraph = document.createElement("p");
-    paragraph.textContent = text;
+    
+paragraph.innerHTML = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\\([>*])/g, "$1")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/^---$/gm, "<hr>")
+    .replace(/^(\d+)\.\s+(.*)$/gm, "<li>$2</li>")
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, "<ol>$1</ol>")
+    .replace(/^&gt;\s?(.*)$/gm, "<blockquote>$1</blockquote>")
+    .replace(/\n/g, "<br>");
 
     messageElement.appendChild(label);
     messageElement.appendChild(paragraph);
     messages.appendChild(messageElement);
-}
-
-function getCoachReply(message) {
-    const text = message.toLowerCase();
-
-    if (text.includes("hello") || text.includes("hi")) {
-        return "Hello! 😊 Great to meet you. Could you tell me a little more about yourself?";
-    }
-
-    if (text.includes("nervous") || text.includes("scared")) {
-        return "It's okay to feel nervous. Take your time. What's one thing you'd like to say first?";
-    }
-
-    if (scenario === "Job Interview") {
-        return "Thanks for sharing! Could you give me a specific example that demonstrates your skills?";
-    }
-
-    if (scenario === "Public Speaking") {
-        return "Good start! Try explaining your main point in one clear sentence. What would you like your audience to remember?";
-    }
-
-    if (scenario === "Meeting New People") {
-        return "That's interesting! What got you interested in that? I'd love to hear more.";
-    }
-
-    return "Thanks for sharing! 😊 Could you tell me a little more about that? Try expressing your next thought in one or two clear sentences.";
+    messages.scrollTop = messages.scrollHeight;
 }
 
 function getCommunicationTip(message) {
     const words = message.trim().split(/\s+/).filter(Boolean);
-    const feedbackText = document.getElementById("feedback-text");
 
     if (words.length <= 3) {
-        feedbackText.textContent =
-            "Try adding a little more detail to express your thoughts clearly.";
-    } else if (words.length <= 15) {
-        feedbackText.textContent =
-            "Nice effort! Your message is concise. Try adding a specific example when it helps explain your point.";
-    } else {
-        feedbackText.textContent =
-            "Your message has several words. Try breaking longer thoughts into shorter sentences for clarity.";
+        return "Try adding a little more detail to express your thoughts clearly.";
     }
+
+    if (words.length <= 15) {
+        return "Nice effort! Try adding a specific example when it helps explain your point.";
+    }
+
+    return "Try breaking longer thoughts into shorter sentences for clarity.";
 }
+
 </script>
 </body>
 </html>

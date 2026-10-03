@@ -362,10 +362,17 @@ body {
     line-height: 1.6;
 }
 
+
 .coach-message {
-    align-self: flex-start;
-    background: #202b46;
-    border: 1px solid var(--border);
+    background: #f0f4ff;
+    color: #1f2937;
+    border: 1px solid #dbe5ff;
+    border-radius: 16px 16px 16px 4px;
+    padding: 16px;
+    margin: 12px 0;
+    max-width: 85%;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
 }
 
 .user-message {
